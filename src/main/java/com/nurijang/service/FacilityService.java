@@ -1,10 +1,13 @@
 package com.nurijang.service;
 
 import com.nurijang.dto.GetFacilitiesResponse;
+import com.nurijang.entity.FacilityEntity;
 import com.nurijang.repository.FacilityRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.awt.geom.Point2D;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -15,8 +18,10 @@ public class FacilityService {
     private final FacilityRepository facilityRepository;
 
     public List<GetFacilitiesResponse> getFacilities(double latitude, double longitude) {
-        double latitudeOffset = 1.5 / 111.0;
-        double longitudeOffset = 1.5 / (111.0 * Math.cos(Math.toRadians(latitude)));
+        Point2D location1 = new Point2D.Double(latitude, longitude);
+
+        double latitudeOffset = 3 / 111.0;
+        double longitudeOffset = 3 / (111.0 * Math.cos(Math.toRadians(latitude)));
 
         double minLatitude = latitude - latitudeOffset;
         double maxLatitude = latitude + latitudeOffset;
@@ -25,14 +30,24 @@ public class FacilityService {
 
         return facilityRepository.findFacilitiesWithinSquare(minLatitude, maxLatitude, minLongitude, maxLongitude)
                 .stream()
-                .map(facilityEntity -> new GetFacilitiesResponse(
-                        facilityEntity.getId(),
-                        facilityEntity.getFcltyNm(),
-                        facilityEntity.getFcltyAddr(),
-                        facilityEntity.getFcltyDetailAddr(),
-                        facilityEntity.getMainItemNm(),
-                        facilityEntity.getFcltyCrdntLo(),
-                        facilityEntity.getFcltyCrdntLa()))
+                .map(facility -> {
+                    Point2D.Double facilityLocation = new Point2D.Double(facility.getFcltyCrdntLa(), facility.getFcltyCrdntLo());
+
+                    double distance = location1.distance(facilityLocation) * 111.0;
+
+                    return new GetFacilitiesResponse(
+                            facility.getId(),
+                            distance,
+                            facility.getFcltyNm(),
+                            facility.getFcltyAddr(),
+                            facility.getFcltyDetailAddr(),
+                            facility.getRprsntvTelNo(),
+                            facility.getMainItemNm(),
+                            facility.getFcltyCrdntLo(),
+                            facility.getFcltyCrdntLa()
+                    );
+                })
+                .sorted(Comparator.comparingDouble(GetFacilitiesResponse::getDistance))
                 .collect(Collectors.toList());
     }
 }
