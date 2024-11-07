@@ -1,6 +1,5 @@
 package com.nurijang.service;
 
-import com.nurijang.dto.GetFacilitiesRequest;
 import com.nurijang.dto.GetFacilitiesResponse;
 import com.nurijang.repository.FacilityRepository;
 import lombok.RequiredArgsConstructor;
@@ -15,14 +14,14 @@ public class FacilityService {
 
     private final FacilityRepository facilityRepository;
 
-    public List<GetFacilitiesResponse> getFacilities(GetFacilitiesRequest request) {
-        double latitudeOffset = 3 / 111.0;
-        double longitudeOffset = 3 / (111.0 * Math.cos(Math.toRadians(request.getFcltyCrdntLo())));
+    public List<GetFacilitiesResponse> getFacilities(double latitude, double longitude) {
+        double latitudeOffset = 1.5 / 111.0;
+        double longitudeOffset = 1.5 / (111.0 * Math.cos(Math.toRadians(latitude)));
 
-        double minLatitude = request.getFcltyCrdntLa() - latitudeOffset;
-        double maxLatitude = request.getFcltyCrdntLa() + latitudeOffset;
-        double minLongitude = request.getFcltyCrdntLo() - longitudeOffset;
-        double maxLongitude = request.getFcltyCrdntLo() + longitudeOffset;
+        double minLatitude = latitude - latitudeOffset;
+        double maxLatitude = latitude + latitudeOffset;
+        double minLongitude = longitude - longitudeOffset;
+        double maxLongitude = longitude + longitudeOffset;
 
         return facilityRepository.findFacilitiesWithinSquare(minLatitude, maxLatitude, minLongitude, maxLongitude)
                 .stream()

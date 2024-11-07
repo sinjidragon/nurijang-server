@@ -44,8 +44,8 @@ public class FacilityController {
     }
 
     @Operation(summary = "주변 시설 정보", description = "경도 위도 순으로 입력")
-    @GetMapping("/facilities")
-    public List<GetFacilitiesResponse> getFacilities(@RequestBody GetFacilitiesRequest getFacilitiesRequest) {
-        return facilityService.getFacilities(getFacilitiesRequest);
+    @PostMapping("/facilities")
+    public List<GetFacilitiesResponse> getFacilities(@RequestBody GetFacilitiesRequest request) {
+        return facilityService.getFacilities(request.getFcltyCrdntLa(), request.getFcltyCrdntLo());
     }
 }
