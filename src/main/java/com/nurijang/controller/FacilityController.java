@@ -6,11 +6,13 @@ import com.nurijang.entity.FacilityEntity;
 import com.nurijang.repository.FacilityRepository;
 import com.nurijang.service.FacilityService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Tag(name = "Facility", description = "마크 관련 API")
 @RestController
 @RequestMapping
 @RequiredArgsConstructor
@@ -42,7 +44,7 @@ public class FacilityController {
     }
 
     @Operation(summary = "주변 시설 정보", description = "위도 경도 순으로 입력")
-    @PostMapping("/facilities")
+    @GetMapping("/facilities")
     public List<GetFacilitiesResponse> getFacilities(@RequestBody GetFacilitiesRequest getFacilitiesRequest) {
         return facilityService.getFacilities(getFacilitiesRequest);
     }
