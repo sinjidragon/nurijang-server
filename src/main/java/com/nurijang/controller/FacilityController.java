@@ -43,7 +43,7 @@ public class FacilityController {
         return facilityRepository.findById(id);
     }
 
-    @Operation(summary = "주변 시설 정보", description = "위도 경도 순으로 입력")
+    @Operation(summary = "주변 시설 정보", description = "경도 위도 순으로 입력")
     @GetMapping("/facilities")
     public List<GetFacilitiesResponse> getFacilities(@RequestBody GetFacilitiesRequest getFacilitiesRequest) {
         return facilityService.getFacilities(getFacilitiesRequest);

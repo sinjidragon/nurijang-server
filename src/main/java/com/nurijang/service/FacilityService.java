@@ -17,7 +17,7 @@ public class FacilityService {
 
     public List<GetFacilitiesResponse> getFacilities(GetFacilitiesRequest request) {
         double latitudeOffset = 3 / 111.0;
-        double longitudeOffset = 3 / (111.0 * Math.cos(Math.toRadians(request.getFcltyCrdntLa())));
+        double longitudeOffset = 3 / (111.0 * Math.cos(Math.toRadians(request.getFcltyCrdntLo())));
 
         double minLatitude = request.getFcltyCrdntLa() - latitudeOffset;
         double maxLatitude = request.getFcltyCrdntLa() + latitudeOffset;
