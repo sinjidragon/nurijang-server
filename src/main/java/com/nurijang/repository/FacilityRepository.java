@@ -18,4 +18,7 @@ public interface FacilityRepository extends JpaRepository<FacilityEntity, Long> 
             @Param("maxLatitude") double maxLatitude,
             @Param("minLongitude") double minLongitude,
             @Param("maxLongitude") double maxLongitude);
+
+    @Query("SELECT f FROM FacilityEntity f WHERE f.fcltyNm LIKE %:searchText% OR f.mainItemNm LIKE %:searchText%")
+    List<FacilityEntity> searchFacilities(String searchText);
 }
