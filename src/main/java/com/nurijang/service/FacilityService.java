@@ -54,9 +54,7 @@ public class FacilityService {
     }
 
     public List<GetFacilitiesResponse> searchFacilities(SearchFacilitiesRequest searchFacilitiesRequest) {
-        log.info("SearchingFacilities1");
         Point2D location2 = new Point2D.Double(searchFacilitiesRequest.getFcltyCrdntLa(), searchFacilitiesRequest.getFcltyCrdntLo());
-        log.info("searchFacilities2");
         return facilityRepository.searchFacilities(searchFacilitiesRequest.getSearchText())
                 .stream()
                 .map(facility ->{
