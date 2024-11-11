@@ -5,9 +5,12 @@ import lombok.Getter;
 
 @Getter
 public class SearchFacilitiesRequest {
+
     @NotNull
     private Double fcltyCrdntLo;
     @NotNull
     private Double fcltyCrdntLa;
+
+    @NotNull
     private String searchText;
 }
