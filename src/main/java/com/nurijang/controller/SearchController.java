@@ -1,7 +1,8 @@
 package com.nurijang.controller;
 
-import com.nurijang.dto.GetFacilitiesResponse;
-import com.nurijang.dto.SearchFacilitiesRequest;
+import com.nurijang.dto.response.GetFacilitiesResponse;
+import com.nurijang.dto.request.SearchFacilitiesRequest;
+import com.nurijang.dto.response.SearchFacilitiesResponse;
 import com.nurijang.service.FacilityService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -24,5 +25,11 @@ public class SearchController {
     @PostMapping("/search")
     public List<GetFacilitiesResponse> searchFacilities(@RequestBody SearchFacilitiesRequest searchFacilitiesRequest) {
         return facilityService.searchFacilities(searchFacilitiesRequest);
+    }
+
+    @Operation(summary = "검색어 자동완성")
+    @PostMapping("/suggestions")
+    public SearchFacilitiesResponse getAutocompleteSuggestions(@RequestBody SearchFacilitiesRequest searchFacilitiesRequest) {
+        return facilityService.getAutocompleteSuggestions(searchFacilitiesRequest);
     }
 }

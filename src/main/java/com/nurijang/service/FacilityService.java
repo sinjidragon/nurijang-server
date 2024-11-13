@@ -1,7 +1,9 @@
 package com.nurijang.service;
 
-import com.nurijang.dto.GetFacilitiesResponse;
-import com.nurijang.dto.SearchFacilitiesRequest;
+import com.nurijang.dto.response.GetFacilitiesResponse;
+import com.nurijang.dto.request.SearchFacilitiesRequest;
+import com.nurijang.dto.response.SearchFacilitiesResponse;
+import com.nurijang.dto.response.SuggestionFacilityResponse;
 import com.nurijang.entity.FacilityDocument;
 import com.nurijang.entity.FacilityEntity;
 import com.nurijang.repository.FacilityDocumentRepository;
@@ -12,8 +14,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.awt.geom.Point2D;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -102,5 +106,44 @@ public class FacilityService {
                 })
                 .sorted(Comparator.comparingDouble(GetFacilitiesResponse::getDistance))
                 .collect(Collectors.toList());
+    }
+
+    public SearchFacilitiesResponse getAutocompleteSuggestions(SearchFacilitiesRequest request) {
+        Point2D location2 = new Point2D.Double(request.getFcltyCrdntLa(), request.getFcltyCrdntLo());
+
+        List<FacilityDocument> mainItemResults = facilityDocumentRepository
+                .findByMainItemNmContaining(request.getSearchText())
+                .stream()
+                .sorted(Comparator.comparingDouble(f -> calculateDistance(f, location2)))
+                .limit(5)
+                .collect(Collectors.toList());
+
+        Set<String> recommendedMainItemsSet = mainItemResults.stream()
+                .map(FacilityDocument::getMainItemNm)
+                .collect(Collectors.toSet());
+
+        List<String> recommendedMainItems = new ArrayList<>(recommendedMainItemsSet);
+
+        List<FacilityDocument> facilityResults = facilityDocumentRepository
+                .findByFcltyNmContaining(request.getSearchText())
+                .stream()
+                .sorted(Comparator.comparingDouble(f -> calculateDistance(f, location2)))
+                .limit(5)
+                .collect(Collectors.toList());
+
+        List<SuggestionFacilityResponse> recommendedFacilities = facilityResults.stream()
+                .map(facilityDocument -> new SuggestionFacilityResponse(
+                        Integer.parseInt(facilityDocument.getId()),
+                        calculateDistance(facilityDocument, location2),
+                        facilityDocument.getFcltyNm()
+                ))
+                .sorted(Comparator.comparingDouble(SuggestionFacilityResponse::getDistance))
+                .collect(Collectors.toList());
+
+        return new SearchFacilitiesResponse(recommendedMainItems, recommendedFacilities);
+    }
+    private double calculateDistance(FacilityDocument facilityDocument, Point2D userLocation) {
+        Point2D facilityLocation = new Point2D.Double(facilityDocument.getFcltyCrdntLa(), facilityDocument.getFcltyCrdntLo());
+        return userLocation.distance(facilityLocation) * 111.0; // 거리 계산 (단위: km)
     }
 }

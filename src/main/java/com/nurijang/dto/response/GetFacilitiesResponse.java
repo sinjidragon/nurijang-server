@@ -1,4 +1,4 @@
-package com.nurijang.dto;
+package com.nurijang.dto.response;
 
 import lombok.Builder;
 import lombok.Getter;

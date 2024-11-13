@@ -1,7 +1,7 @@
 package com.nurijang.controller;
 
-import com.nurijang.dto.GetFacilitiesRequest;
-import com.nurijang.dto.GetFacilitiesResponse;
+import com.nurijang.dto.request.GetFacilitiesRequest;
+import com.nurijang.dto.response.GetFacilitiesResponse;
 import com.nurijang.entity.FacilityEntity;
 import com.nurijang.repository.FacilityRepository;
 import com.nurijang.service.FacilityService;

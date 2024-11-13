@@ -7,4 +7,6 @@ import java.util.List;
 
 public interface FacilityDocumentRepository extends ElasticsearchRepository<FacilityDocument, String> {
     List<FacilityDocument> findByMainItemNmContainingOrFcltyNmContaining(String mainItemNm, String fcltyNm);
+    List<FacilityDocument> findByMainItemNmContaining(String mainItemNm);
+    List<FacilityDocument> findByFcltyNmContaining(String fcltyNm);
 }
