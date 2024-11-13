@@ -27,6 +27,12 @@ public class SearchController {
         return facilityService.searchFacilities(searchFacilitiesRequest);
     }
 
+    @Operation(summary = "종목 검색")
+    @PostMapping("/search-item")
+    public List<GetFacilitiesResponse> searchFacilitiesByItem(@RequestBody SearchFacilitiesRequest searchFacilitiesRequest) {
+        return facilityService.searchFacilitiesByItem(searchFacilitiesRequest);
+    }
+
     @Operation(summary = "검색어 자동완성")
     @PostMapping("/suggestions")
     public SearchFacilitiesResponse getAutocompleteSuggestions(@RequestBody SearchFacilitiesRequest searchFacilitiesRequest) {

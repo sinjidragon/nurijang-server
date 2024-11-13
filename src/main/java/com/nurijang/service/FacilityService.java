@@ -108,42 +108,62 @@ public class FacilityService {
                 .collect(Collectors.toList());
     }
 
+    public List<GetFacilitiesResponse> searchFacilitiesByItem(SearchFacilitiesRequest request) {
+        Point2D location2 = new Point2D.Double(request.getFcltyCrdntLa(), request.getFcltyCrdntLo());
+        return facilityDocumentRepository.findByMainItemNm(request.getSearchText())
+                .stream()
+                .map(facilityDocument ->{
+                    Point2D.Double facilityLocation = new Point2D.Double(facilityDocument.getFcltyCrdntLa(), facilityDocument.getFcltyCrdntLo());
+
+                    double distance = location2.distance(facilityLocation) * 111.0;
+
+                    return new GetFacilitiesResponse(
+                            Integer.parseInt(facilityDocument.getId()),
+                            distance,
+                            facilityDocument.getFcltyNm(),
+                            facilityDocument.getFcltyAddr(),
+                            facilityDocument.getFcltyDetailAddr(),
+                            facilityDocument.getRprsntvTelNo(),
+                            facilityDocument.getMainItemNm(),
+                            facilityDocument.getFcltyCrdntLo(),
+                            facilityDocument.getFcltyCrdntLa()
+                    );
+                })
+                .sorted(Comparator.comparingDouble(GetFacilitiesResponse::getDistance))
+                .collect(Collectors.toList());
+    }
+
     public SearchFacilitiesResponse getAutocompleteSuggestions(SearchFacilitiesRequest request) {
         Point2D location2 = new Point2D.Double(request.getFcltyCrdntLa(), request.getFcltyCrdntLo());
 
-        List<FacilityDocument> mainItemResults = facilityDocumentRepository
-                .findByMainItemNmContaining(request.getSearchText())
-                .stream()
+        List<FacilityDocument> results = facilityDocumentRepository
+                .findByMainItemNmStartingWithOrFcltyNmStartingWith(request.getSearchText(), request.getSearchText());
+
+        Set<String> recommendedMainItemsSet = results.stream()
+                .filter(doc -> doc.getMainItemNm().startsWith(request.getSearchText()))
                 .sorted(Comparator.comparingDouble(f -> calculateDistance(f, location2)))
                 .limit(5)
-                .collect(Collectors.toList());
-
-        Set<String> recommendedMainItemsSet = mainItemResults.stream()
                 .map(FacilityDocument::getMainItemNm)
                 .collect(Collectors.toSet());
 
         List<String> recommendedMainItems = new ArrayList<>(recommendedMainItemsSet);
 
-        List<FacilityDocument> facilityResults = facilityDocumentRepository
-                .findByFcltyNmContaining(request.getSearchText())
-                .stream()
+        List<SuggestionFacilityResponse> recommendedFacilities = results.stream()
+                .filter(doc -> doc.getFcltyNm().startsWith(request.getSearchText()))
                 .sorted(Comparator.comparingDouble(f -> calculateDistance(f, location2)))
                 .limit(5)
-                .collect(Collectors.toList());
-
-        List<SuggestionFacilityResponse> recommendedFacilities = facilityResults.stream()
                 .map(facilityDocument -> new SuggestionFacilityResponse(
                         Integer.parseInt(facilityDocument.getId()),
                         calculateDistance(facilityDocument, location2),
                         facilityDocument.getFcltyNm()
                 ))
-                .sorted(Comparator.comparingDouble(SuggestionFacilityResponse::getDistance))
                 .collect(Collectors.toList());
 
         return new SearchFacilitiesResponse(recommendedMainItems, recommendedFacilities);
     }
+
     private double calculateDistance(FacilityDocument facilityDocument, Point2D userLocation) {
         Point2D facilityLocation = new Point2D.Double(facilityDocument.getFcltyCrdntLa(), facilityDocument.getFcltyCrdntLo());
-        return userLocation.distance(facilityLocation) * 111.0; // 거리 계산 (단위: km)
+        return userLocation.distance(facilityLocation) * 111.0;
     }
 }
