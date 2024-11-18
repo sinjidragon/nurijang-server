@@ -12,6 +12,7 @@ import com.nurijang.repository.FacilityRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.awt.geom.Point2D;
@@ -158,6 +159,7 @@ public class FacilityService {
                 .collect(Collectors.toList());
     }
 
+    @Cacheable(value = "autocompleteSuggestions", key = "#request.searchText + #request.fcltyCrdntLa + #request.fcltyCrdntLo")
     public SearchFacilitiesResponse getAutocompleteSuggestions(SearchFacilitiesRequest request) {
         Point2D location2 = new Point2D.Double(request.getFcltyCrdntLa(), request.getFcltyCrdntLo());
 
