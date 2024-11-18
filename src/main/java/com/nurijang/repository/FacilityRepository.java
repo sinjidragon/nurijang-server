@@ -8,7 +8,6 @@ import org.springframework.data.jpa.repository.Query;
 import java.util.List;
 
 public interface FacilityRepository extends JpaRepository<FacilityEntity, Long> {
-    FacilityEntity findById(int id);
 
     @Query("SELECT f FROM FacilityEntity f " +
             "WHERE f.fcltyCrdntLa BETWEEN :minLatitude AND :maxLatitude " +

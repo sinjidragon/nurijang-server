@@ -1,6 +1,7 @@
 package com.nurijang.controller;
 
 import com.nurijang.dto.request.GetFacilitiesRequest;
+import com.nurijang.dto.request.GetFacilityDetailRequest;
 import com.nurijang.dto.response.GetFacilitiesResponse;
 import com.nurijang.entity.FacilityEntity;
 import com.nurijang.repository.FacilityRepository;
@@ -38,9 +39,9 @@ public class FacilityController {
             "      fcltyCrdntLo 시설좌표경도\n" +
             "      fcltyCrdntLa 시설좌표위도\n" +
             "      courseFlagCd 강좌구분코드")
-    @GetMapping("/{id}")
-    public FacilityEntity getFacility(@RequestParam int id) {
-        return facilityRepository.findById(id);
+    @PostMapping("/facility-detail")
+    public GetFacilitiesResponse getFacility(@RequestBody GetFacilityDetailRequest request) {
+        return facilityService.getFacilityDetail(request);
     }
 
     @Operation(summary = "주변 시설 정보", description = "경도 위도 순으로 입력")

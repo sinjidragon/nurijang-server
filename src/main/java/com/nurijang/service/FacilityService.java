@@ -1,5 +1,6 @@
 package com.nurijang.service;
 
+import com.nurijang.dto.request.GetFacilityDetailRequest;
 import com.nurijang.dto.response.GetFacilitiesResponse;
 import com.nurijang.dto.request.SearchFacilitiesRequest;
 import com.nurijang.dto.response.SearchFacilitiesResponse;
@@ -47,6 +48,30 @@ public class FacilityService {
             facilityDocumentRepository.save(document);
         }
         log.info("Facilities indexed");
+    }
+
+    public GetFacilitiesResponse getFacilityDetail(GetFacilityDetailRequest request) {
+        Point2D location1 = new Point2D.Double(request.getFcltyCrdntLa(), request.getFcltyCrdntLo());
+
+        return facilityRepository.findById((long) request.getId())
+                .map(facility -> {
+                    Point2D.Double facilityLocation = new Point2D.Double(facility.getFcltyCrdntLa(), facility.getFcltyCrdntLo());
+
+                    double distance = location1.distance(facilityLocation) * 111.0;
+
+                    return new GetFacilitiesResponse(
+                            facility.getId(),
+                            distance,
+                            facility.getFcltyNm(),
+                            facility.getFcltyAddr(),
+                            facility.getFcltyDetailAddr(),
+                            facility.getRprsntvTelNo(),
+                            facility.getMainItemNm(),
+                            facility.getFcltyCrdntLo(),
+                            facility.getFcltyCrdntLa()
+                    );
+                })
+                .orElseThrow(() -> new IllegalArgumentException("Facility not found with id: " + request.getId()));
     }
 
     public List<GetFacilitiesResponse> getFacilities(double latitude, double longitude) {
