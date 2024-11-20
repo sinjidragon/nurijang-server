@@ -6,12 +6,9 @@ import com.nurijang.dto.response.SearchFacilitiesResponse;
 import com.nurijang.dto.response.SuggestionFacilityResponse;
 import com.nurijang.entity.FacilityDocument;
 import com.nurijang.repository.FacilityDocumentRepository;
-import com.nurijang.repository.FacilityRepository;
-import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.awt.geom.Point2D;
