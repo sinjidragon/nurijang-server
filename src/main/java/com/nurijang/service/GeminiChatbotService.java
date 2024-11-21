@@ -37,15 +37,17 @@ public class GeminiChatbotService {
         if (response.getStatusCode().is2xxSuccessful()) {
             try {
                 ObjectMapper objectMapper = new ObjectMapper();
-                JsonNode rootNode = objectMapper.readTree(response.getBody());
-                return rootNode
-                        .path("candidates")
-                        .get(0)
-                        .path("content")
-                        .path("parts")
-                        .get(0)
-                        .path("text")
-                        .asText();
+                JsonNode root = objectMapper.readTree(response.getBody());
+
+                JsonNode candidates = root.path("candidates");
+                if (candidates.isArray() && candidates.size() > 0) {
+                    JsonNode firstCandidate = candidates.get(0);
+                    JsonNode textNode = firstCandidate.path("content").path("parts").get(0).path("text");
+                    if (!textNode.isMissingNode()) {
+                        return textNode.asText();
+                    }
+                }
+                throw new RuntimeException("No valid response text found in the Gemini API response.");
             } catch (Exception e) {
                 throw new RuntimeException("Failed to parse the response from Gemini API", e);
             }
@@ -53,4 +55,5 @@ public class GeminiChatbotService {
             throw new RuntimeException("Failed to communicate with Gemini API");
         }
     }
+
 }
