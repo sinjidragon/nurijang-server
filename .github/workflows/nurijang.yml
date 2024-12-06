@@ -43,27 +43,16 @@ jobs:
           tags: ${{ secrets.DOCKER_USERNAME }}/nurijang:latest
           platforms: linux/amd64
 
-      - name: SSH to EC2 and Deploy (Blue/Green)
+      - name: ssh to ec2
         uses: appleboy/ssh-action@v0.1.5
         with:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USER }}
           script: |
-            sudo docker stop nurijang-blue-container || true
-            sudo docker rm nurijang-blue-container || true
+            sudo docker stop nurijang-container || true
+            sudo docker rm nurijang-container || true
+
             sudo docker pull ${{ secrets.DOCKER_USERNAME }}/nurijang:latest
-            sudo docker run -d --name nurijang-blue-container --env-file .env -p 8080:8080 -e TZ=Asia/Seoul ${{ secrets.DOCKER_USERNAME }}/nurijang:latest
-
-            curl -f https://your-domain.com/healthcheck || exit 1
-
-            sudo docker stop nurijang-green-container || true
-            sudo docker rm nurijang-green-container || true
-            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/nurijang:latest
-            sudo docker run -d --name nurijang-green-container --env-file .env -p 8080:8080 -e TZ=Asia/Seoul ${{ secrets.DOCKER_USERNAME }}/nurijang:latest
-
-            sudo cp /etc/nginx/sites-available/green /etc/nginx/sites-enabled/nurijang
-            sudo nginx -s reload
-
-            sudo docker stop nurijang-blue-container || true
-            sudo docker rm nurijang-blue-container || true
+            
+            sudo docker run -d --name nurijang-container --env-file .env -p 8080:8080 -e TZ=Asia/Seoul ${{ secrets.DOCKER_USERNAME }}/nurijang:latest
