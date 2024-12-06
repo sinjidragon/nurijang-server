@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  deploy:
+  build-and-push:
     runs-on: ubuntu-latest
 
     steps:
@@ -28,6 +28,12 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
+      - name: Set environment values
+        run: |
+          rm -f .env 
+          echo "${{ secrets.ENV }}" > .env
+        shell: bash
+
       - name: Build and push Docker image
         uses: docker/build-push-action@v4
         with:
@@ -37,26 +43,27 @@ jobs:
           tags: ${{ secrets.DOCKER_USERNAME }}/nurijang:latest
           platforms: linux/amd64
 
-      - name: Deploy to EC2
+      - name: SSH to EC2 and Deploy (Blue/Green)
         uses: appleboy/ssh-action@v0.1.5
         with:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USER }}
           script: |
-            sudo su
-            ACTIVE_SERVER=$(curl -fs http://localhost:8080/env | grep blue || echo "green")
-            TARGET_SERVER="blue"
-            TARGET_PORT=8080
-            [ "$ACTIVE_SERVER" = "blue" ] && TARGET_SERVER="green" && TARGET_PORT=8081
-
-            sudo docker stop nurijang-${TARGET_SERVER}-container || true
-            sudo docker rm nurijang-${TARGET_SERVER}-container || true
+            sudo docker stop nurijang-blue-container || true
+            sudo docker rm nurijang-blue-container || true
             sudo docker pull ${{ secrets.DOCKER_USERNAME }}/nurijang:latest
-            sudo docker run -d --name nurijang-${TARGET_SERVER}-container --env-file .env -p ${TARGET_PORT}:${TARGET_PORT} ${{ secrets.DOCKER_USERNAME }}/nurijang:latest
+            sudo docker run -d --name nurijang-blue-container --env-file .env -p 8080:8080 -e TZ=Asia/Seoul ${{ secrets.DOCKER_USERNAME }}/nurijang:latest
 
-            sudo ln -sf /etc/nginx/sites-available/${TARGET_SERVER} /etc/nginx/sites-enabled/nurijang
-            sudo systemctl reload nginx
+            curl -f https://your-domain.com/healthcheck || exit 1
 
-            sleep 10
-            curl -f http://localhost:${TARGET_PORT}/env || exit 1
+            sudo docker stop nurijang-green-container || true
+            sudo docker rm nurijang-green-container || true
+            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/nurijang:latest
+            sudo docker run -d --name nurijang-green-container --env-file .env -p 8080:8080 -e TZ=Asia/Seoul ${{ secrets.DOCKER_USERNAME }}/nurijang:latest
+
+            sudo cp /etc/nginx/sites-available/green /etc/nginx/sites-enabled/nurijang
+            sudo nginx -s reload
+
+            sudo docker stop nurijang-blue-container || true
+            sudo docker rm nurijang-blue-container || true
